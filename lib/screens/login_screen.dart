@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'survey_page.dart';
+import 'login_success_page.dart'; // Import the new success page
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
@@ -8,8 +8,6 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '/utils/config.dart';
-
-
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,7 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailOrPhoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? _errorMessage;
-
 
   @override
   Future<void> _handleGoogleLogin() async {
@@ -55,14 +52,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Sign in with raw credential
       await FirebaseAuth.instance.signInWithCredential(credential);
-      print('✅ Firebase sign-in successful, navigating to survey page');
+      print('✅ Firebase sign-in successful, navigating to success page');
 
-      // Success, navigate to survey page
+      // Success, navigate to success page instead of survey page
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const SurveyPage()),
+          MaterialPageRoute(builder: (context) => const LoginSuccessPage()),
         );
       });
     } catch (e) {
@@ -99,9 +96,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final code = Uri.parse(result).queryParameters['code'];
       if (code != null) {
+        // Navigate to success page instead of survey page
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const SurveyPage()),
+          MaterialPageRoute(builder: (context) => const LoginSuccessPage()),
         );
       } else {
         throw Exception('Spotify login failed: No code returned');
@@ -127,7 +125,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
   }
-
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     // Google Button
                     ElevatedButton.icon(
-                      onPressed: _handleGoogleLogin, // TODO: Handle Google login
+                      onPressed: _handleGoogleLogin,
                       icon: const FaIcon(FontAwesomeIcons.google, color: Colors.black),
                       label: const Text('Continue with Google', style: TextStyle(color: Colors.black)),
                       style: ElevatedButton.styleFrom(
@@ -242,66 +239,65 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 16),
 
                     // Error Placeholder
-                  if (_errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(
-                          color: Colors.redAccent,
-                          fontSize: 14,
+                    if (_errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
-                    ),
 
                     // Sign In Button
-                ElevatedButton(
-                  onPressed: () {
-                    final emailOrPhone = _emailOrPhoneController.text.trim();
-                    final password = _passwordController.text;
+                    ElevatedButton(
+                      onPressed: () {
+                        final emailOrPhone = _emailOrPhoneController.text.trim();
+                        final password = _passwordController.text;
 
-                    // Simulate test users
-                    final testAccounts = {
-                      'john@example.com': 'pass123',
-                      '5315060138': 'pass456',
-                      'test@gmail.com': 'test123',
-                    };
+                        // Simulate test users
+                        final testAccounts = {
+                          'john@example.com': 'pass123',
+                          '5315060138': 'pass456',
+                          'test@gmail.com': 'test123',
+                        };
 
-                    // Normalize phone number (remove spaces)
-                    final normalizedInput = emailOrPhone.contains('@')
-                        ? emailOrPhone
-                        : emailOrPhone.replaceAll(' ', '');
+                        // Normalize phone number (remove spaces)
+                        final normalizedInput = emailOrPhone.contains('@')
+                            ? emailOrPhone
+                            : emailOrPhone.replaceAll(' ', '');
 
-                    if (testAccounts.containsKey(normalizedInput) &&
-                        testAccounts[normalizedInput] == password) {
-                      // Login successful
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Login successful! Redirecting...')),
-                      );
+                        if (testAccounts.containsKey(normalizedInput) &&
+                            testAccounts[normalizedInput] == password) {
+                          // Login successful - navigate to success page
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Login successful!')),
+                          );
 
-                      Future.delayed(const Duration(seconds: 1), () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SurveyPage()),
-                        );
-                      });
-                    } else {
-                      // Show error
-                      setState(() {
-                        _errorMessage = 'Invalid email/phone or password';
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(_errorMessage!)),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade600,
-                    minimumSize: const Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text('Sign in'),
-                ),
+                          // Navigate to the success page instead of directly to survey
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LoginSuccessPage()),
+                          );
+                        } else {
+                          // Show error
+                          setState(() {
+                            _errorMessage = 'Invalid email/phone or password';
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(_errorMessage!)),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue.shade600,
+                        minimumSize: const Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text('Sign in'),
+                    ),
                   ],
                 ),
               ),
