@@ -1,0 +1,16 @@
+{
+  "name": "appium_tests",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "appium": "^2.17.1",
+    "wd": "^1.14.0"
+  }
+}
