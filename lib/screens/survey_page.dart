@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 class SurveyPage extends StatefulWidget {
@@ -163,6 +164,21 @@ class _SurveyPageState extends State<SurveyPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI Survey'),
+        actions: [
+          IconButton(
+            key: const Key('logoutButton'),
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+
+              // Pop everything and go back to login screen
+              if (context.mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+              }
+            },
+          ),
+        ],
       ),
       body: Form(
         key: _formKey,

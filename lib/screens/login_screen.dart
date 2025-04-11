@@ -164,7 +164,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             key: const Key('testLoginButton'),
                             onPressed: () async {
                               try {
-                                // Try to authenticate, but don't fail the test if it doesn't work
                                 try {
                                   await FirebaseAuth.instance.signInWithEmailAndPassword(
                                     email: 'test@gmail.com',
