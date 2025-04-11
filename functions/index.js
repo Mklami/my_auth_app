@@ -1,30 +1,33 @@
-const { initializeApp } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
-const { onDocumentCreated } = require('firebase-functions/v2/firestore');
-const { logger } = require('firebase-functions');
-const nodemailer = require('nodemailer');
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { initializeApp } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
+const nodemailer = require("nodemailer");
 
 // Initialize Firebase Admin
 initializeApp();
-const db = getFirestore();
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
-    user: 'mayasa.naama@gmail.com',
-    pass: 'tzez zlux zwqk wbbg', // App password
+    user: "mayasa.naama@gmail.com",
+    pass: "tzez zlux zwqk wbbg",
   },
 });
 
-// Cloud Function
-exports.sendSurveyEmail = onDocumentCreated('survey_responses/{docId}', async (event) => {
+// 2nd gen function
+exports.sendSurveyEmail = onDocumentCreated("survey_responses/{docId}", async (event) => {
   const data = event.data.data();
 
+  if (!data) {
+    console.log("No data found in document");
+    return;
+  }
+
   const mailOptions = {
-    from: 'mayasa.naama@gmail.com',
-    to: data.recipientEmail || 'mayasa.naama@gmail.com',
-    subject: 'New AI Survey Submitted ✅',
+    from: "mayasa.naama@gmail.com",
+    to: data.recipientEmail || "mayasa.naama@gmail.com",
+    subject: "New AI Survey Submitted ✅",
     html: `
       <p><strong>Name:</strong> ${data.name}</p>
       <p><strong>Birth Date:</strong> ${data.birthDate}</p>
@@ -41,8 +44,8 @@ exports.sendSurveyEmail = onDocumentCreated('survey_responses/{docId}', async (e
 
   try {
     await transporter.sendMail(mailOptions);
-    logger.info('✅ Email sent successfully to', mailOptions.to);
+    console.log("✅ Email sent successfully to", mailOptions.to);
   } catch (error) {
-    logger.error('❌ Error sending email:', error);
+    console.error("❌ Error sending email:", error);
   }
 });
