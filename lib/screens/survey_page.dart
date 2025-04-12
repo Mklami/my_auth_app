@@ -2,7 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/semantics.dart';
 
+// Extension to make any widget more testable
+extension TestableWidgetExtension on Widget {
+  Widget withTestSemantics(String testId, {String? label, String? hint, String? value}) {
+    return Semantics(
+      // Convert the string to a SemanticsTag
+      tagForChildren: SemanticsTag(testId),
+      label: label,
+      hint: hint,
+      value: value,
+      child: this,
+    );
+  }
+}
 
 class SurveyPage extends StatefulWidget {
   const SurveyPage({Key? key}) : super(key: key);
@@ -167,8 +181,8 @@ class _SurveyPageState extends State<SurveyPage> {
         actions: [
           IconButton(
             key: const Key('logoutButton'),
-            icon: const Icon(Icons.logout),
             tooltip: 'Logout',
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
 
@@ -177,7 +191,7 @@ class _SurveyPageState extends State<SurveyPage> {
                 Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
               }
             },
-          ),
+          ).withTestSemantics('logoutButton', label: 'Logout Button'),
         ],
       ),
       body: Form(
@@ -187,195 +201,263 @@ class _SurveyPageState extends State<SurveyPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Name Field
-              TextFormField(
-                key: const Key('nameField'),
-                decoration: const InputDecoration(
-                  labelText: 'Name-Surname *',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
-                onChanged: (value) {
-                  setState(() {
-                    _name = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Birth Date Field
-              InkWell(
-                key: const Key('birthDateField'),
-                onTap: () => _selectDate(context),
-                child: InputDecorator(
+              // Name Field - Enhanced with Semantics for testing
+              Semantics(
+                label: 'Name-Surname Field',
+                textField: true,
+                value: _name,
+                hint: 'Enter your full name',
+                child: TextFormField(
+                  key: const Key('nameField'),
                   decoration: const InputDecoration(
-                    labelText: 'Birth Date *',
+                    labelText: 'Name-Surname *',
                     border: OutlineInputBorder(),
                   ),
-                  child: Text(
-                    _birthDate == null
-                        ? 'Select Date'
-                        : DateFormat('yyyy-MM-dd').format(_birthDate!),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your name';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      _name = value;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Birth Date Field - Using GestureDetector for better testability
+              Semantics(
+                label: 'Birth Date Field',
+                button: true,
+                value: _birthDate == null
+                    ? 'Select Date'
+                    : DateFormat('yyyy-MM-dd').format(_birthDate!),
+                hint: 'Tap to select a date',
+                child: GestureDetector(
+                  key: const Key('birthDateField'),
+                  behavior: HitTestBehavior.opaque, // Makes entire area tappable
+                  onTap: () => _selectDate(context),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Birth Date *',
+                      border: OutlineInputBorder(),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _birthDate == null
+                              ? 'Select Date'
+                              : DateFormat('yyyy-MM-dd').format(_birthDate!),
+                        ),
+                        const Icon(Icons.calendar_today),
+                      ],
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Education Level Field
-              DropdownButtonFormField<String>(
-                key: const Key('educationField'),
-                decoration: const InputDecoration(
-                  labelText: 'Education Level *',
-                  border: OutlineInputBorder(),
-                ),
-                value: _educationLevel.isEmpty ? null : _educationLevel,
-                items: _educationLevels.map((String level) {
-                  return DropdownMenuItem<String>(
-                    value: level,
-                    child: Text(level),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _educationLevel = newValue ?? '';
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // City Field
-              TextFormField(
-                key: const Key('cityField'),
-                decoration: const InputDecoration(
-                  labelText: 'City *',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your city';
-                  }
-                  return null;
-                },
-                onChanged: (value) {
-                  setState(() {
-                    _city = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Gender Field
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Gender *',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  ...List.generate(_genderOptions.length, (index) {
-                    return RadioListTile<String>(
-                      key: Key('genderOption_${_genderOptions[index]}'),
-                      title: Text(_genderOptions[index]),
-                      value: _genderOptions[index],
-                      groupValue: _gender,
-                      onChanged: (String? value) {
-                        setState(() {
-                          _gender = value ?? '';
-                        });
-                      },
+              // Education Level Field - Enhanced for testability
+              Semantics(
+                label: 'Education Level Dropdown',
+                button: true,
+                value: _educationLevel.isEmpty ? 'No selection' : _educationLevel,
+                hint: 'Tap to select your education level',
+                child: DropdownButtonFormField<String>(
+                  key: const Key('educationField'),
+                  decoration: const InputDecoration(
+                    labelText: 'Education Level *',
+                    border: OutlineInputBorder(),
+                  ),
+                  value: _educationLevel.isEmpty ? null : _educationLevel,
+                  items: _educationLevels.map((String level) {
+                    return DropdownMenuItem<String>(
+                      value: level,
+                      child: Text(level),
                     );
-                  }),
-                ],
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _educationLevel = newValue ?? '';
+                    });
+                  },
+                ),
               ),
               const SizedBox(height: 16),
 
-              // AI Models Selection
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('AI Models You\'ve Tried *',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  ...List.generate(_aiModels.length, (index) {
-                    String model = _aiModels.keys.elementAt(index);
-                    return Column(
-                      children: [
-                        CheckboxListTile(
-                          key: Key('aiModel_$model'),
-                          title: Text(model),
-                          value: _aiModels[model],
-                          onChanged: (bool? value) {
-                            _updateAIModelSelection(model, value ?? false);
+              // City Field - Enhanced for testability
+              Semantics(
+                label: 'City Field',
+                textField: true,
+                value: _city,
+                hint: 'Enter your city',
+                child: TextFormField(
+                  key: const Key('cityField'),
+                  decoration: const InputDecoration(
+                    labelText: 'City *',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your city';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      _city = value;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Gender Field - Enhanced for testability
+              Semantics(
+                label: 'Gender Selection Section',
+                explicitChildNodes: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Gender *',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    ...List.generate(_genderOptions.length, (index) {
+                      return Semantics(
+                        label: '${_genderOptions[index]} option',
+                        selected: _gender == _genderOptions[index],
+                        child: RadioListTile<String>(
+                          key: Key('genderOption_${_genderOptions[index]}'),
+                          title: Text(_genderOptions[index]),
+                          value: _genderOptions[index],
+                          groupValue: _gender,
+                          onChanged: (String? value) {
+                            setState(() {
+                              _gender = value ?? '';
+                            });
                           },
                         ),
-                        if (_aiModels[model] ?? false) ...[
-                          const SizedBox(height: 8),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 32.0, right: 16.0),
-                            child: TextFormField(
-                              key: Key('aiModelDefects_$model'),
-                              decoration: InputDecoration(
-                                labelText: 'Defects/Cons of $model *',
-                                border: const OutlineInputBorder(),
-                              ),
-                              maxLines: 2,
-                              onChanged: (value) {
-                                setState(() {
-                                  _aiModelDefects[model] = value;
-                                });
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // AI Models Selection - Enhanced for testability
+              Semantics(
+                label: 'AI Models Section',
+                explicitChildNodes: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('AI Models You\'ve Tried *',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    ...List.generate(_aiModels.length, (index) {
+                      String model = _aiModels.keys.elementAt(index);
+                      return Column(
+                        children: [
+                          Semantics(
+                            label: 'AI Model $model checkbox',
+                            checked: _aiModels[model] ?? false,
+                            child: CheckboxListTile(
+                              key: Key('aiModel_$model'),
+                              title: Text(model),
+                              value: _aiModels[model],
+                              onChanged: (bool? value) {
+                                _updateAIModelSelection(model, value ?? false);
                               },
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          if (_aiModels[model] ?? false) ...[
+                            const SizedBox(height: 8),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 32.0, right: 16.0),
+                              child: Semantics(
+                                label: 'Defects of $model field',
+                                textField: true,
+                                value: _aiModelDefects[model] ?? '',
+                                hint: 'Enter defects or cons of $model',
+                                child: TextFormField(
+                                  key: Key('aiModelDefects_$model'),
+                                  decoration: InputDecoration(
+                                    labelText: 'Defects/Cons of $model *',
+                                    border: const OutlineInputBorder(),
+                                  ),
+                                  maxLines: 2,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _aiModelDefects[model] = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
                         ],
-                      ],
-                    );
-                  }),
-                ],
+                      );
+                    }),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
 
-              // Beneficial Use Case Field
-              TextFormField(
-                key: const Key('beneficialUseCaseField'),
-                decoration: const InputDecoration(
-                  labelText: 'Beneficial Use Case of AI in Daily Life *',
-                  border: OutlineInputBorder(),
+              // Beneficial Use Case Field - Enhanced for testability
+              Semantics(
+                label: 'Beneficial Use Case Field',
+                textField: true,
+                multiline: true,
+                value: _beneficialUseCase,
+                hint: 'Describe a beneficial use case of AI in daily life',
+                child: TextFormField(
+                  key: const Key('beneficialUseCaseField'),
+                  decoration: const InputDecoration(
+                    labelText: 'Beneficial Use Case of AI in Daily Life *',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 4,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please describe a beneficial use case';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      _beneficialUseCase = value;
+                    });
+                  },
                 ),
-                maxLines: 4,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please describe a beneficial use case';
-                  }
-                  return null;
-                },
-                onChanged: (value) {
-                  setState(() {
-                    _beneficialUseCase = value;
-                  });
-                },
               ),
               const SizedBox(height: 24),
 
               // Submit Button - only appears when all fields are filled
               if (_isFormValid)
                 Center(
-                  child: ElevatedButton(
-                    key: const Key('submitButton'),
-                    onPressed: _submitSurvey,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32.0,
-                        vertical: 12.0,
+                  child: Semantics(
+                    label: 'Send button',
+                    button: true,
+                    enabled: _isFormValid,
+                    hint: 'Submit your survey responses',
+                    child: ElevatedButton(
+                      key: const Key('submitButton'),
+                      onPressed: _submitSurvey,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32.0,
+                          vertical: 12.0,
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      'Send',
-                      style: TextStyle(fontSize: 18),
+                      child: const Text(
+                        'Send',
+                        style: TextStyle(fontSize: 18),
+                      ),
                     ),
                   ),
                 ),
