@@ -301,32 +301,53 @@ class _LoginScreenState extends State<LoginScreen> {
                         final emailOrPhone = _emailOrPhoneController.text.trim();
                         final password = _passwordController.text;
 
-                        // Simulate test users
+                        final emailRegex = RegExp(r"^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$");
+                        final phoneRegex = RegExp(r"^\d{10,11}$");
+
                         final testAccounts = {
                           'john@example.com': 'pass123',
                           '5315060138': 'pass456',
                           'test@gmail.com': 'test123',
                         };
 
-                        // Normalize phone number (remove spaces)
                         final normalizedInput = emailOrPhone.contains('@')
                             ? emailOrPhone
                             : emailOrPhone.replaceAll(' ', '');
 
+                        // 4.3 - Empty field check
+                        if (emailOrPhone.isEmpty || password.isEmpty) {
+                          setState(() {
+                            _errorMessage = 'Please enter both email/phone and password.';
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(_errorMessage!)),
+                          );
+                          return;
+                        }
+
+                        // 4.4 - Format validation
+                        if (!emailRegex.hasMatch(normalizedInput) && !phoneRegex.hasMatch(normalizedInput)) {
+                          setState(() {
+                            _errorMessage = 'Invalid format for email or phone number.';
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(_errorMessage!)),
+                          );
+                          return;
+                        }
+
+                        // 4.2 - Invalid credentials
                         if (testAccounts.containsKey(normalizedInput) &&
                             testAccounts[normalizedInput] == password) {
-                          // Login successful - navigate to success page
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Login successful!')),
                           );
 
-                          // Navigate to the success page instead of directly to survey
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (context) => const LoginSuccessPage()),
                           );
                         } else {
-                          // Show error
                           setState(() {
                             _errorMessage = 'Invalid email/phone or password';
                           });
