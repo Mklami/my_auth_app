@@ -59,7 +59,8 @@ class _SurveyPageState extends State<SurveyPage> {
 
   // Check if all required fields are filled
   bool get _isFormValid {
-    return _name.isNotEmpty &&
+    // First check if all required fields have values
+    bool hasRequiredFields = _name.isNotEmpty &&
         _birthDate != null &&
         _educationLevel.isNotEmpty &&
         _city.isNotEmpty &&
@@ -68,6 +69,79 @@ class _SurveyPageState extends State<SurveyPage> {
         _aiModels.entries.where((entry) => entry.value).every(
                 (entry) => _aiModelDefects[entry.key]?.isNotEmpty ?? false) &&
         _beneficialUseCase.isNotEmpty;
+
+    // If basic requirements are met, check detailed validation
+    if (hasRequiredFields) {
+      // Check if birth date is valid
+      bool validBirthDate = _isValidBirthDate(_birthDate);
+
+      // Check if name is valid (returns null if valid)
+      bool validName = _validateName(_name) == null;
+
+      // Check if city is valid
+      bool validCity = _validateCity(_city) == null;
+
+      // Check if each selected AI model has valid defects
+      bool validAIDefects = true;
+      for (var entry in _aiModels.entries) {
+        if (entry.value) { // If model is selected
+          if (_validateAIModelDefects(_aiModelDefects[entry.key], entry.key) != null) {
+            validAIDefects = false;
+            break;
+          }
+        }
+      }
+
+      // Check if beneficial use case is valid
+      bool validUseCase = _validateBeneficialUseCase(_beneficialUseCase) == null;
+
+      // Form is valid only if all validations pass
+      return validBirthDate && validName && validCity && validAIDefects && validUseCase;
+    }
+
+    return false; // Required fields are missing
+  }
+
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your name';
+    }
+
+    // Check if name contains at least 2 words (for name and surname)
+    final nameWords = value.trim().split(' ').where((word) => word.isNotEmpty).length;
+    if (nameWords < 2) {
+      return 'Please enter both name and surname';
+    }
+
+    // Check for reasonable length
+    if (value.trim().length < 5) {
+      return 'Name is too short';
+    }
+
+    return null;
+  }
+
+  bool _isValidBirthDate(DateTime? date) {
+    if (date == null) return false;
+
+    // Check if date is not in the future
+    if (date.isAfter(DateTime.now())) return false;
+
+    // Check if person is not too old (e.g., older than 120 years)
+    final DateTime minReasonableDate = DateTime.now().subtract(const Duration(days: 365 * 120));
+    if (date.isBefore(minReasonableDate)) return false;
+
+    // Calculate age
+    final DateTime today = DateTime.now();
+    int age = today.year - date.year;
+    if (today.month < date.month || (today.month == date.month && today.day < date.day)) {
+      age--;
+    }
+
+    // Check if person meets minimum age requirement (10 years)
+    if (age < 10) return false;
+
+    return true;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -79,10 +153,66 @@ class _SurveyPageState extends State<SurveyPage> {
     );
 
     if (picked != null && picked != _birthDate) {
-      setState(() {
-        _birthDate = picked;
-      });
+      // Validate the date before setting it
+      if (_isValidBirthDate(picked)) {
+        setState(() {
+          _birthDate = picked;
+        });
+      } else {
+        // Show an error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid birth date. Participants must be between 10 and 120 years old.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
+  }
+
+  String? _validateCity(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your city';
+    }
+
+    // Check for minimum length
+    if (value.trim().length < 2) {
+      return 'City name is too short';
+    }
+
+    // Optional: Validate that city contains only letters, spaces, and hyphens
+    final cityRegExp = RegExp(r"^[a-zA-Z\s\-]+$");
+    if (!cityRegExp.hasMatch(value)) {
+      return 'City can only contain letters, spaces, and hyphens';
+    }
+
+    return null;
+  }
+
+  String? _validateAIModelDefects(String? value, String modelName) {
+    if (value == null || value.isEmpty) {
+      return 'Please describe defects for $modelName';
+    }
+
+    // Check for minimum length
+    if (value.trim().length < 5) {
+      return 'Description is too short';
+    }
+
+    return null;
+  }
+
+  String? _validateBeneficialUseCase(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please describe a beneficial use case';
+    }
+
+    // Check for minimum length
+    if (value.trim().length < 10) {
+      return 'Description is too short (minimum 10 characters)';
+    }
+
+    return null;
   }
 
   void _updateAIModelSelection(String model, bool selected) {
@@ -96,61 +226,75 @@ class _SurveyPageState extends State<SurveyPage> {
     });
   }
 
+  Future<void> _logoutAndNavigateHome() async {
+    await FirebaseAuth.instance.signOut();
+    if (context.mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    }
+  }
+
+
   Future<void> _submitSurvey() async {
-    if (_formKey.currentState!.validate() && _isFormValid) {
-      try {
-        // Show loading indicator
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const Center(child: CircularProgressIndicator()),
-        );
-
-        // Format the data
-        final surveyData = {
-          'name': _name,
-          'birthDate': _birthDate!.toString().split(' ')[0],
-          'educationLevel': _educationLevel,
-          'city': _city,
-          'gender': _gender,
-          'aiModels': _aiModels.entries
-              .where((entry) => entry.value)
-              .map((entry) => {
-            'model': entry.key,
-            'defects': _aiModelDefects[entry.key],
-          })
-              .toList(),
-          'beneficialUseCase': _beneficialUseCase,
-          'timestamp': FieldValue.serverTimestamp(),
-          'recipientEmail': 'mayasa.naama@gmail.com', // The email to send the survey to
-        };
-
-        // Save to Firestore
-        await FirebaseFirestore.instance
-            .collection('survey_responses')
-            .add(surveyData);
-
-        // Close loading indicator
-        Navigator.of(context).pop();
-
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Survey submitted successfully! Email will be sent shortly.')),
-        );
-
-        // Clear form
-        _resetForm();
-      } catch (e) {
-        // Close loading indicator if it's showing
-        Navigator.of(context, rootNavigator: true).pop();
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error submitting survey: $e')),
-        );
-      }
-    } else {
+    // First validate the form
+    if (!(_formKey.currentState!.validate() && _isFormValid)) {
+      // Show error message if form is not valid
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields')),
+        const SnackBar(
+          content: Text('Please fill all required fields correctly'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;  // Exit the method early
+    }
+
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      // Format the data
+      final surveyData = {
+        'name': _name,
+        'birthDate': _birthDate!.toString().split(' ')[0],
+        'educationLevel': _educationLevel,
+        'city': _city,
+        'gender': _gender,
+        'aiModels': _aiModels.entries
+            .where((entry) => entry.value)
+            .map((entry) => {
+          'model': entry.key,
+          'defects': _aiModelDefects[entry.key],
+        })
+            .toList(),
+        'beneficialUseCase': _beneficialUseCase,
+        'timestamp': FieldValue.serverTimestamp(),
+        'recipientEmail': 'mayasa.naama@gmail.com', // The email to send the survey to
+      };
+
+      // Save to Firestore
+      await FirebaseFirestore.instance
+          .collection('survey_responses')
+          .add(surveyData);
+
+      // Close loading indicator
+      Navigator.of(context).pop();
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Survey submitted successfully! Email will be sent shortly.')),
+      );
+
+      // Navigate back to login screen after successful submission
+      await _logoutAndNavigateHome();
+    } catch (e) {
+      // Close loading indicator if it's showing
+      Navigator.of(context, rootNavigator: true).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error submitting survey: $e')),
       );
     }
   }
@@ -183,14 +327,7 @@ class _SurveyPageState extends State<SurveyPage> {
             key: const Key('logoutButton'),
             tooltip: 'Logout',
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-
-              // Pop everything and go back to login screen
-              if (context.mounted) {
-                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-              }
-            },
+            onPressed: _logoutAndNavigateHome
           ).withTestSemantics('logoutButton', label: 'Logout Button'),
         ],
       ),
@@ -437,30 +574,30 @@ class _SurveyPageState extends State<SurveyPage> {
               ),
               const SizedBox(height: 24),
 
-              // Submit Button - only appears when all fields are filled
-              if (_isFormValid)
-                Center(
-                  child: Semantics(
-                    label: 'Send button',
-                    button: true,
-                    enabled: _isFormValid,
-                    hint: 'Submit your survey responses',
-                    child: ElevatedButton(
-                      key: const Key('submitButton'),
-                      onPressed: _submitSurvey,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32.0,
-                          vertical: 12.0,
-                        ),
+              Center(
+                child: Semantics(
+                  label: 'Send button',
+                  button: true,
+                  enabled: true,  // Always enabled for UI accessibility
+                  hint: 'Submit your survey responses',
+                  child: ElevatedButton(
+                    key: const Key('submitButton'),
+                    onPressed: _submitSurvey,  // This will handle validation inside the method
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32.0,
+                        vertical: 12.0,
                       ),
-                      child: const Text(
-                        'Send',
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      // Optionally change the button appearance based on form validity
+                      backgroundColor: _isFormValid ? null : Colors.grey[300],
+                    ),
+                    child: const Text(
+                      'Send',
+                      style: TextStyle(fontSize: 18),
                     ),
                   ),
                 ),
+              ),
             ],
           ),
         ),
