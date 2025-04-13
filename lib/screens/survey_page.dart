@@ -31,6 +31,12 @@ class _SurveyPageState extends State<SurveyPage> {
   // Form fields
   String _name = '';
   DateTime? _birthDate;
+
+  // New separate date fields
+  String _birthDay = '';
+  String _birthMonth = '';
+  String _birthYear = '';
+
   String _educationLevel = '';
   String _city = '';
   String _gender = '';
@@ -61,7 +67,7 @@ class _SurveyPageState extends State<SurveyPage> {
   bool get _isFormValid {
     // First check if all required fields have values
     bool hasRequiredFields = _name.isNotEmpty &&
-        _birthDate != null &&
+        _isValidDateInput() &&
         _educationLevel.isNotEmpty &&
         _city.isNotEmpty &&
         _gender.isNotEmpty &&
@@ -100,6 +106,85 @@ class _SurveyPageState extends State<SurveyPage> {
     }
 
     return false; // Required fields are missing
+  }
+
+  // Method to check if the date input is valid and set _birthDate
+  bool _isValidDateInput() {
+    if (_birthDay.isEmpty || _birthMonth.isEmpty || _birthYear.isEmpty) {
+      return false;
+    }
+
+    try {
+      int day = int.parse(_birthDay);
+      int month = int.parse(_birthMonth);
+      int year = int.parse(_birthYear);
+
+      // Check if values are in valid ranges
+      if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > DateTime.now().year) {
+        return false;
+      }
+
+      // Try to create a DateTime object
+      _birthDate = DateTime(year, month, day);
+      return true;
+    } catch (e) {
+      // Invalid date format
+      return false;
+    }
+  }
+
+  // Validate the text field input for day
+  String? _validateDay(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Required';
+    }
+
+    try {
+      int day = int.parse(value);
+      if (day < 1 || day > 31) {
+        return 'Invalid';
+      }
+    } catch (e) {
+      return 'Numbers only';
+    }
+
+    return null;
+  }
+
+  // Validate the text field input for month
+  String? _validateMonth(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Required';
+    }
+
+    try {
+      int month = int.parse(value);
+      if (month < 1 || month > 12) {
+        return 'Invalid';
+      }
+    } catch (e) {
+      return 'Numbers only';
+    }
+
+    return null;
+  }
+
+  // Validate the text field input for year
+  String? _validateYear(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Required';
+    }
+
+    try {
+      int year = int.parse(value);
+      if (year < 1900 || year > DateTime.now().year) {
+        return 'Invalid';
+      }
+    } catch (e) {
+      return 'Numbers only';
+    }
+
+    return null;
   }
 
   String? _validateName(String? value) {
@@ -142,32 +227,6 @@ class _SurveyPageState extends State<SurveyPage> {
     if (age < 10) return false;
 
     return true;
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _birthDate ?? DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-
-    if (picked != null && picked != _birthDate) {
-      // Validate the date before setting it
-      if (_isValidBirthDate(picked)) {
-        setState(() {
-          _birthDate = picked;
-        });
-      } else {
-        // Show an error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid birth date. Participants must be between 10 and 120 years old.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   String? _validateCity(String? value) {
@@ -233,8 +292,18 @@ class _SurveyPageState extends State<SurveyPage> {
     }
   }
 
-
   Future<void> _submitSurvey() async {
+    // Attempt to create valid birth date from inputs before submission
+    if (!_isValidDateInput()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid birth date'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     // First validate the form
     if (!(_formKey.currentState!.validate() && _isFormValid)) {
       // Show error message if form is not valid
@@ -303,6 +372,9 @@ class _SurveyPageState extends State<SurveyPage> {
     setState(() {
       _name = '';
       _birthDate = null;
+      _birthDay = '';
+      _birthMonth = '';
+      _birthYear = '';
       _educationLevel = '';
       _city = '';
       _gender = '';
@@ -324,10 +396,10 @@ class _SurveyPageState extends State<SurveyPage> {
         title: const Text('AI Survey'),
         actions: [
           IconButton(
-            key: const Key('logoutButton'),
-            tooltip: 'Logout',
-            icon: const Icon(Icons.logout),
-            onPressed: _logoutAndNavigateHome
+              key: const Key('logoutButton'),
+              tooltip: 'Logout',
+              icon: const Icon(Icons.logout),
+              onPressed: _logoutAndNavigateHome
           ).withTestSemantics('logoutButton', label: 'Logout Button'),
         ],
       ),
@@ -365,36 +437,111 @@ class _SurveyPageState extends State<SurveyPage> {
               ),
               const SizedBox(height: 16),
 
-              // Birth Date Field - Using GestureDetector for better testability
-              Semantics(
-                label: 'Birth Date Field',
-                button: true,
-                value: _birthDate == null
-                    ? 'Select Date'
-                    : DateFormat('yyyy-MM-dd').format(_birthDate!),
-                hint: 'Tap to select a date',
-                child: GestureDetector(
-                  key: const Key('birthDateField'),
-                  behavior: HitTestBehavior.opaque, // Makes entire area tappable
-                  onTap: () => _selectDate(context),
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Birth Date *',
-                      border: OutlineInputBorder(),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _birthDate == null
-                              ? 'Select Date'
-                              : DateFormat('yyyy-MM-dd').format(_birthDate!),
+              // Birth Date Field - Now using separate inputs for day, month, year
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Birth Date *',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      // Day input
+                      Expanded(
+                        flex: 1,
+                        child: Semantics(
+                          label: 'Birth Day Field',
+                          textField: true,
+                          value: _birthDay,
+                          hint: 'Enter day (1-31)',
+                          child: TextFormField(
+                            key: const Key('birthDayField'),
+                            decoration: const InputDecoration(
+                              labelText: 'Day',
+                              border: OutlineInputBorder(),
+                              counterText: '',
+                            ),
+                            keyboardType: TextInputType.number,
+                            maxLength: 2,
+                            validator: _validateDay,
+                            onChanged: (value) {
+                              setState(() {
+                                _birthDay = value;
+                                _isValidDateInput(); // Try to create date object
+                              });
+                            },
+                          ),
                         ),
-                        const Icon(Icons.calendar_today),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Month input
+                      Expanded(
+                        flex: 1,
+                        child: Semantics(
+                          label: 'Birth Month Field',
+                          textField: true,
+                          value: _birthMonth,
+                          hint: 'Enter month (1-12)',
+                          child: TextFormField(
+                            key: const Key('birthMonthField'),
+                            decoration: const InputDecoration(
+                              labelText: 'Month',
+                              border: OutlineInputBorder(),
+                              counterText: '',
+                            ),
+                            keyboardType: TextInputType.number,
+                            maxLength: 2,
+                            validator: _validateMonth,
+                            onChanged: (value) {
+                              setState(() {
+                                _birthMonth = value;
+                                _isValidDateInput(); // Try to create date object
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Year input
+                      Expanded(
+                        flex: 2,
+                        child: Semantics(
+                          label: 'Birth Year Field',
+                          textField: true,
+                          value: _birthYear,
+                          hint: 'Enter year (e.g., 1990)',
+                          child: TextFormField(
+                            key: const Key('birthYearField'),
+                            decoration: const InputDecoration(
+                              labelText: 'Year',
+                              border: OutlineInputBorder(),
+                              counterText: '',
+                            ),
+                            keyboardType: TextInputType.number,
+                            maxLength: 4,
+                            validator: _validateYear,
+                            onChanged: (value) {
+                              setState(() {
+                                _birthYear = value;
+                                _isValidDateInput(); // Try to create date object
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                  if (_birthDay.isNotEmpty && _birthMonth.isNotEmpty && _birthYear.isNotEmpty && !_isValidDateInput())
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'Please enter a valid date',
+                        style: TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 16),
 

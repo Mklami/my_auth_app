@@ -1,0 +1,587 @@
+{
+  "test_cases": [
+    {
+      "id": "TC1",
+      "name": "Comprehensive Form Validation - Required Fields",
+      "description": "Tests the enforcement of all required fields across the form",
+      "scenarios": [
+        {
+          "scenario_id": "TC1.1",
+          "description": "All fields valid - form should submit successfully",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information and hallucinations"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers and identify key points quickly."
+          },
+          "expected_result": {
+            "should_submit": true
+          }
+        },
+        {
+          "scenario_id": "TC1.2",
+          "description": "Missing name - form should not submit",
+          "inputs": {
+            "name": "",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "Please enter your name"
+          }
+        },
+        {
+          "scenario_id": "TC1.3",
+          "description": "Name with only one word - form should not submit",
+          "inputs": {
+            "name": "Jane",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "Please enter both name and surname"
+          }
+        },
+        {
+          "scenario_id": "TC1.4",
+          "description": "Missing city - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "Please enter your city"
+          }
+        },
+        {
+          "scenario_id": "TC1.5",
+          "description": "Missing beneficial use case - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": ""
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "Please describe a beneficial use case"
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC2",
+      "name": "Birth Date Validation",
+      "description": "Tests the validation of birth date field with various inputs",
+      "scenarios": [
+        {
+          "scenario_id": "TC2.1",
+          "description": "Valid birth date - form should submit successfully",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": true
+          }
+        },
+        {
+          "scenario_id": "TC2.2",
+          "description": "Missing day - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "Please enter a valid date"
+          }
+        },
+        {
+          "scenario_id": "TC2.3",
+          "description": "Invalid day (out of range) - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "32",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "Please enter a valid date"
+          }
+        },
+        {
+          "scenario_id": "TC2.4",
+          "description": "Future date - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2030"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "Please enter a valid date"
+          }
+        },
+        {
+          "scenario_id": "TC2.5",
+          "description": "Too old date (>120 years) - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "1900"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "Please enter a valid date"
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC3",
+      "name": "Selection Fields Validation (Education and Gender)",
+      "description": "Tests the validation of dropdown and radio selection fields",
+      "scenarios": [
+        {
+          "scenario_id": "TC3.1",
+          "description": "No education selected - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false
+          }
+        },
+        {
+          "scenario_id": "TC3.2",
+          "description": "No gender selected - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false
+          }
+        },
+        {
+          "scenario_id": "TC3.3",
+          "description": "Different education and gender selections - all valid",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Doctorate",
+            "city": "Istanbul",
+            "gender": "Non-binary",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC4",
+      "name": "AI Models and Defects Validation",
+      "description": "Tests the validation of AI model selection and corresponding defect entries",
+      "scenarios": [
+        {
+          "scenario_id": "TC4.1",
+          "description": "No AI model selected - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {},
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false
+          }
+        },
+        {
+          "scenario_id": "TC4.2",
+          "description": "AI model selected but no defect entry - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": ""
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false
+          }
+        },
+        {
+          "scenario_id": "TC4.3",
+          "description": "Multiple AI models with valid defects - form should submit successfully",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes hallucinates facts",
+              "Claude": "Limited knowledge cutoff",
+              "Copilot": "Sometimes suggests incorrect code"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC5",
+      "name": "Validation of Free-Text Input Boundaries",
+      "description": "Tests input validation boundaries such as minimum length, format requirements, etc.",
+      "scenarios": [
+        {
+          "scenario_id": "TC5.1",
+          "description": "City with non-alphabetic characters - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul123",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "City can only contain letters, spaces, and hyphens"
+          }
+        },
+        {
+          "scenario_id": "TC5.2",
+          "description": "City name too short - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "A",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "City name is too short"
+          }
+        },
+        {
+          "scenario_id": "TC5.3",
+          "description": "Beneficial use case too short - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps"
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "Description is too short"
+          }
+        },
+        {
+          "scenario_id": "TC5.4",
+          "description": "AI model defect too short - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Bad"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "Description is too short"
+          }
+        }
+      ]
+    },
+    {
+      "id": "TC6",
+      "name": "Edge Case Validation",
+      "description": "Tests edge cases like age boundaries and special characters",
+      "scenarios": [
+        {
+          "scenario_id": "TC6.1",
+          "description": "User exactly 10 years old (minimum age) - form should submit successfully",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2015"
+            },
+            "education": "High School",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me with my homework and explains difficult concepts."
+          },
+          "expected_result": {
+            "should_submit": true
+          }
+        },
+        {
+          "scenario_id": "TC6.2",
+          "description": "User under 10 years old - form should not submit",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2016"
+            },
+            "education": "High School",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me with my homework."
+          },
+          "expected_result": {
+            "should_submit": false,
+            "error_message": "Please enter a valid date"
+          }
+        },
+        {
+          "scenario_id": "TC6.3",
+          "description": "Hyphenated city name - form should submit successfully",
+          "inputs": {
+            "name": "Jane Doe",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "New-York",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": true
+          }
+        },
+        {
+          "scenario_id": "TC6.4",
+          "description": "Name with apostrophe and hyphen - form should submit successfully",
+          "inputs": {
+            "name": "Mary-Jane O'Connor",
+            "birth_date": {
+              "day": "15",
+              "month": "6",
+              "year": "2000"
+            },
+            "education": "Bachelor's Degree",
+            "city": "Istanbul",
+            "gender": "Female",
+            "ai_models_with_defects": {
+              "ChatGPT": "Sometimes gives incorrect information"
+            },
+            "beneficial_use_case": "AI helps me summarize research papers."
+          },
+          "expected_result": {
+            "should_submit": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+[
+  {
+    "test_case_id": "TC1",
+    "scenario_id": "TC1.1",
+    "description": "All fields valid - form should submit successfully",
+    "success": true,
+    "message": "Successfully submitted form and redirected to login screen as expected",
+    "timestamp": "2025-04-13 19:40:06"
+  },
+  {
+    "test_case_id": "TC1",
+    "scenario_id": "TC1.2",
+    "description": "Missing name - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:41:28"
+  },
+  {
+    "test_case_id": "TC1",
+    "scenario_id": "TC1.3",
+    "description": "Name with only one word - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:42:53"
+  },
+  {
+    "test_case_id": "TC1",
+    "scenario_id": "TC1.4",
+    "description": "Missing city - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:44:15"
+  },
+  {
+    "test_case_id": "TC1",
+    "scenario_id": "TC1.5",
+    "description": "Missing beneficial use case - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:45:39"
+  },
+  {
+    "test_case_id": "TC2",
+    "scenario_id": "TC2.1",
+    "description": "Valid birth date - form should submit successfully",
+    "success": true,
+    "message": "Successfully submitted form and redirected to login screen as expected",
+    "timestamp": "2025-04-13 19:46:55"
+  },
+  {
+    "test_case_id": "TC2",
+    "scenario_id": "TC2.2",
+    "description": "Missing day - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:48:20"
+  },
+  {
+    "test_case_id": "TC2",
+    "scenario_id": "TC2.3",
+    "description": "Invalid day (out of range) - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:49:42"
+  },
+  {
+    "test_case_id": "TC2",
+    "scenario_id": "TC2.4",
+    "description": "Future date - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:51:05"
+  },
+  {
+    "test_case_id": "TC2",
+    "scenario_id": "TC2.5",
+    "description": "Too old date (>120 years) - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:52:29"
+  },
+  {
+    "test_case_id": "TC3",
+    "scenario_id": "TC3.1",
+    "description": "No education selected - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:53:50"
+  },
+  {
+    "test_case_id": "TC3",
+    "scenario_id": "TC3.2",
+    "description": "No gender selected - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:55:12"
+  },
+  {
+    "test_case_id": "TC3",
+    "scenario_id": "TC3.3",
+    "description": "Different education and gender selections - all valid",
+    "success": true,
+    "message": "Successfully submitted form and redirected to login screen as expected",
+    "timestamp": "2025-04-13 19:56:29"
+  },
+  {
+    "test_case_id": "TC4",
+    "scenario_id": "TC4.1",
+    "description": "No AI model selected - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:57:47"
+  },
+  {
+    "test_case_id": "TC4",
+    "scenario_id": "TC4.2",
+    "description": "AI model selected but no defect entry - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 19:59:10"
+  },
+  {
+    "test_case_id": "TC4",
+    "scenario_id": "TC4.3",
+    "description": "Multiple AI models with valid defects - form should submit successfully",
+    "success": true,
+    "message": "Successfully submitted form and redirected to login screen as expected",
+    "timestamp": "2025-04-13 20:00:36"
+  },
+  {
+    "test_case_id": "TC5",
+    "scenario_id": "TC5.1",
+    "description": "City with non-alphabetic characters - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 20:02:01"
+  },
+  {
+    "test_case_id": "TC5",
+    "scenario_id": "TC5.2",
+    "description": "City name too short - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 20:03:24"
+  },
+  {
+    "test_case_id": "TC5",
+    "scenario_id": "TC5.3",
+    "description": "Beneficial use case too short - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 20:04:46"
+  },
+  {
+    "test_case_id": "TC5",
+    "scenario_id": "TC5.4",
+    "description": "AI model defect too short - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 20:06:09"
+  },
+  {
+    "test_case_id": "TC6",
+    "scenario_id": "TC6.1",
+    "description": "User exactly 10 years old (minimum age) - form should submit successfully",
+    "success": false,
+    "message": "Could not determine if submission was successful",
+    "timestamp": "2025-04-13 20:07:33"
+  },
+  {
+    "test_case_id": "TC6",
+    "scenario_id": "TC6.2",
+    "description": "User under 10 years old - form should not submit",
+    "success": false,
+    "message": "Could not determine if submission was blocked",
+    "timestamp": "2025-04-13 20:08:55"
+  },
+  {
+    "test_case_id": "TC6",
+    "scenario_id": "TC6.3",
+    "description": "Hyphenated city name - form should submit successfully",
+    "success": true,
+    "message": "Successfully submitted form and redirected to login screen as expected",
+    "timestamp": "2025-04-13 20:10:13"
+  },
+  {
+    "test_case_id": "TC6",
+    "scenario_id": "TC6.4",
+    "description": "Name with apostrophe and hyphen - form should submit successfully",
+    "success": true,
+    "message": "Successfully submitted form and redirected to login screen as expected",
+    "timestamp": "2025-04-13 20:11:33"
+  }
+]
